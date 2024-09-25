@@ -1,0 +1,203 @@
+# Testing 2 Datasets for Data parsing
+"""
+ONLY testing 2 datasets 2021_DNN-EdgeIIoT-dataset.csv |2021-23_AnoML-IoT.csv
+The Code below has issues in regards to the categories per column.
+This will be a continous issue throughout other combinations of datasets
+"""
+
+import pandas as pd #library for ---
+import numpy as np #library for
+import matplotlib.pyplot as plt #library for
+import seaborn as sns #library for
+from sklearn.model_selection import train_test_split #library for splitting dataset into training and testing subsets
+from sklearn.ensemble import RandomForestClassifier #library for using the Random Forest algorithm, used for classification
+from sklearn.metrics import classification_report, accuracy_score #library for evaluating classification models metrics like accuracy, precision, recall, and F1 score
+from sklearn.neural_network import MLPRegressor #library for using Multi-Layer Perceptron (MLP), a type of neural network, for tasks like regression and anomaly detection (unsupervised learning)
+
+# Loading datasets from the PC paths
+edgeIiotData = pd.read_csv('C:\\Users\\homep\\Desktop\\PRISM URP\\Datasets\\2021_DNN-EdgeIIoT-dataset.csv')
+anomlIotData = pd.read_csv('C:\\Users\\homep\\Desktop\\PRISM URP\\Datasets\\2021-23_AnoML-IoT.csv')
+
+# Quick data overview
+print("Edge-IIoT Dataset:")
+print(edgeIiotData.head())
+print()
+print("AnoML-IoT Dataset:")
+print(anomlIotData.head())
+
+# Preprocessing: fill any missing values with 0
+edgeIiotData.fillna(0, inplace=True)
+anomlIotData.fillna(0, inplace=True)
+
+# Feature Selection for IDS (adjust the feature names based on your actual dataset)
+edgeCategories = ['src_ip', 'dst_ip', 'packet_size', 'traffic_duration', 'label']  # Modify as per dataset
+anomlCategories = ['flow_duration', 'packet_size', 'protocol_type', 'anomaly']  # Modify as per dataset
+
+edgeIiotData = edgeIiotData[edgeCategories]
+anomlIotData = anomlIotData[anomlCategories]
+
+# Visualize the Attack Labels from 2021_DNN-EdgeIIoT
+plt.figure(figsize=(10, 6))
+sns.countplot(data=edgeIiotData, x='label')
+plt.title('Distribution of Attack Types in 2021_DNN-EdgeIIoT Dataset')
+plt.show()
+ 
+# Visualize the Protocol Type Distribution from 2021-23_AnoML-IoT
+plt.figure(figsize=(10, 6))
+sns.countplot(data=anomlIotData, x='protocol_type')
+plt.title('Distribution of Protocols in 2021-23_AnoML-IoT Dataset')
+plt.show()
+
+# Visualize Packet Size Distribution in both datasets
+plt.figure(figsize=(10, 6))
+plt.hist(edgeIiotData['packet_size'], bins=50, alpha=0.5, label='EdgeIIoT')
+plt.hist(anomlIotData['packet_size'], bins=50, alpha=0.5, label='AnoML-IoT')
+plt.title('Packet Size Distribution in EdgeIIoT and AnoML-IoT Datasets')
+plt.legend(loc='upper right')
+plt.show()
+
+# Random Forest for classification on 2021_DNN-EdgeIIoT dataset
+X = edgeIiotData[['packet_size', 'traffic_duration']]
+y = edgeIiotData['label']
+
+xTrain, xTest, yTrain, yTest = train_test_split(X, y, test_size=0.3, random_state=42)
+rfModel = RandomForestClassifier(n_estimators=100)
+rfModel.fit(xTrain, yTrain)
+
+# Make predictions and evaluate the model
+yPred = rfModel.predict(xTest)
+print(f"Random Forest Accuracy: {accuracy_score(yTest, yPred)}")
+print(classification_report(yTest, yPred))
+
+# Autoencoder for anomaly detection on 2021-23_AnoML-IoT dataset
+autoencoder = MLPRegressor(hidden_layer_sizes=(64, 32, 64), max_iter=100)
+xAutoencoder = anomlIotData[['flow_duration', 'packet_size']]
+autoencoder.fit(xAutoencoder, xAutoencoder)
+
+# Reconstruct data and calculate anomaly scores
+reconstructed = autoencoder.predict(xAutoencoder)
+mse = np.mean(np.power(xAutoencoder - reconstructed, 2), axis=1)
+anomlIotData['anomaly_score'] = mse
+
+# Visualize Anomaly Scores
+plt.figure(figsize=(10, 6))
+plt.hist(anomlIotData['anomaly_score'], bins=50)
+plt.title('Anomaly Scores (Autoencoder) - 2021-23_AnoML-IoT Dataset')
+plt.show()
+
+"""
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.neural_network import MLPRegressor
+
+# Load the datasets from the specified paths
+edgeIiotData = pd.read_csv('C:\\Users\\homep\\Desktop\\PRISM URP\\Datasets\\2021_DNN-EdgeIIoT-dataset.csv')
+anomlIotData = pd.read_csv('C:\\Users\\homep\\Desktop\\PRISM URP\\Datasets\\2021-23_AnoML-IoT.csv')
+
+# Quick data overview
+print("Edge-IIoT Dataset:")
+print(edgeIiotData.head())
+print()
+print("AnoML-IoT Dataset:")
+print(anomlIotData.head())
+
+# Preprocessing: fill any missing values with 0
+edgeIiotData.fillna(0, inplace=True)
+anomlIotData.fillna(0, inplace=True)
+
+# Feature Selection for IDS (adjusted column names based on your dataset)
+edgeCategories = ['ip.src_host', 'ip.dst_host', 'frame.len', 'frame.time_relative', 'Attack_label']  # Modify as per dataset
+anomlCategories = ['flow_duration', 'packet_size', 'protocol_type', 'anomaly']  # Modify as per dataset
+
+edgeIiotData = edgeIiotData[edgeCategories]
+anomlIotData = anomlIotData[anomlCategories]
+
+# Visualize the Attack Labels from 2021_DNN-EdgeIIoT
+plt.figure(figsize=(10, 6))
+sns.countplot(data=edgeIiotData, x='Attack_label')
+plt.title('Distribution of Attack Types in 2021_DNN-EdgeIIoT Dataset')
+plt.show()
+
+# Visualize the Protocol Type Distribution from 2021-23_AnoML-IoT
+plt.figure(figsize=(10, 6))
+sns.countplot(data=anomlIotData, x='protocol_type')
+plt.title('Distribution of Protocols in 2021-23_AnoML-IoT Dataset')
+plt.show()
+
+# Visualize Packet Size Distribution in both datasets
+plt.figure(figsize=(10, 6))
+plt.hist(edgeIiotData['frame.len'], bins=50, alpha=0.5, label='EdgeIIoT')
+plt.hist(anomlIotData['packet_size'], bins=50, alpha=0.5, label='AnoML-IoT')
+plt.title('Packet Size Distribution in EdgeIIoT and AnoML-IoT Datasets')
+plt.legend(loc='upper right')
+plt.show()
+
+# Random Forest for classification on 2021_DNN-EdgeIIoT dataset
+X = edgeIiotData[['frame.len', 'frame.time_relative']]
+y = edgeIiotData['Attack_label']
+
+xTrain, xTest, yTrain, yTest = train_test_split(X, y, test_size=0.3, random_state=42)
+rfModel = RandomForestClassifier(n_estimators=100)
+rfModel.fit(xTrain, yTrain)
+
+# Make predictions and evaluate the model
+yPred = rfModel.predict(xTest)
+print(f"Random Forest Accuracy: {accuracy_score(yTest, yPred)}")
+print(classification_report(yTest, yPred))
+
+# Autoencoder for anomaly detection on 2021-23_AnoML-IoT dataset
+autoencoder = MLPRegressor(hidden_layer_sizes=(64, 32, 64), max_iter=100)
+xAutoencoder = anomlIotData[['flow_duration', 'packet_size']]
+autoencoder.fit(xAutoencoder, xAutoencoder)
+
+# Reconstruct data and calculate anomaly scores
+reconstructed = autoencoder.predict(xAutoencoder)
+mse = np.mean(np.power(xAutoencoder - reconstructed, 2), axis=1)
+anomlIotData['anomaly_score'] = mse
+
+# Visualize Anomaly Scores
+plt.figure(figsize=(10, 6))
+plt.hist(anomlIotData['anomaly_score'], bins=50)
+plt.title('Anomaly Scores (Autoencoder) - 2021-23_AnoML-IoT Dataset')
+plt.show()
+
+
+Output for the code above: 
+C:\sers\homep\PycharmProjects\idpsResearch\main.py:103: DtypeWarning: Columns (2,3,6,11,13,14,15,16,17,31,32,34,39,45,51,54,55) have mixed types. Specify dtype option on import or set low_memory=False.
+  edgeIiotData = pd.read_csv('C:\sers\homep\Desktop\PRISM URP\Datasets2021_DNN-EdgeIIoT-dataset.csv')
+Edge-IIoT Dataset:
+                  frame.time    ip.src_host  ... Attack_label Attack_type
+0   2021 11:44:10.081753000   192.168.0.128  ...            0      Normal
+1   2021 11:44:10.162218000   192.168.0.101  ...            0      Normal
+2   2021 11:44:10.162271000   192.168.0.128  ...            0      Normal
+3   2021 11:44:10.162641000   192.168.0.128  ...            0      Normal
+4   2021 11:44:10.166132000   192.168.0.101  ...            0      Normal
+
+[5 rows x 63 columns]
+
+AnoML-IoT Dataset:
+         Time  Temperature  Humidity  Air Quality  Light  Loudness
+0  1623781306        37.94     28.94           75    644       106
+1  1623781316        37.94     29.00           75    645       145
+2  1623781326        37.88     28.88           75    644       146
+3  1623781336        37.72     28.94           75    646       139
+4  1623781346        37.69     29.19           75    644       155
+Traceback (most recent call last):
+  File "C:Users\homep\PycharmProjects\idpsResearch\main.py", line 121, in <module>
+    edgeIiotData = edgeIiotData[edgeCategories]
+  File "C:Users\homep\PycharmProjects\idpsResearchvenv\lib\site-packages\pandas\coreframe.py", line 4108, in __getitem__
+    indexer = self.columns._get_indexer_strict(key, "columns")[1]
+  File "C:Users\homep\PycharmProjects\idpsResearchvenv\lib\site-packages\pandas\core\indexesase.py", line 6200, in _get_indexer_strict
+    self._raise_if_missing(keyarr, indexer, axis_name)
+  File "C:Users\homep\PycharmProjects\idpsResearch\env\lib\site-packages\pandas\core\indexesbase.py", line 6252, in _raise_if_missing
+    raise KeyError(f"{not_found} not in index")
+KeyError: "['frame.len', 'frame.time_relative'] not in index"
+
+"""
