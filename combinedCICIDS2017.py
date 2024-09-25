@@ -16,3 +16,5 @@ for file in os.listdir(folderPath):
 combinedData = pd.concat(dataframes, ignore_index=True)
 combinedData.to_csv('combined_CICIDS2017.csv', index=False)
 print(f"Combined data shape: {combinedData.shape}")
+
+# Keep in mind the output was a larger CSV File in which in contain data extracted from multiple smaller CSV files
