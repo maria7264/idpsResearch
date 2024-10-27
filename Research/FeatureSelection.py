@@ -24,6 +24,6 @@ Pseudocode
       leastFeature ← rankedFeatures[-1]
       drop(CSVFeature, leastFeature)
       
-  Output the reduced feature set from CSV_X and return the important features
+  Output the reduced feature set from CSVFeature and return the important features
    return CSVFeature
 """
