@@ -25,5 +25,5 @@ Pseudocode
       drop(CSVFeature, leastFeature)
       
   Output the reduced feature set from CSV_X and return the important features
-   return CSV_X
+   return CSVFeature
 """
